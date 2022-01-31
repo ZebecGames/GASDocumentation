@@ -48,7 +48,7 @@ void AGDMinionCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (AbilitySystemComponent.IsValid())
+	if (AbilitySystemComponent != nullptr && AbilitySystemComponent->IsValidLowLevel())
 	{
 		AbilitySystemComponent->InitAbilityActorInfo(this, this);
 		InitializeAttributes();

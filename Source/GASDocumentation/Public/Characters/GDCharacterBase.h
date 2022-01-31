@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "AbilitySystemInterface.h"
 #include "GameplayTagContainer.h"
+#include "Abilities/GDAbilitySystemComponent.h"
+#include "Abilities/AttributeSets/GDAttributeSetBase.h"
 #include "GASDocumentation/GASDocumentation.h"
 #include "GDCharacterBase.generated.h"
 
@@ -103,8 +105,11 @@ protected:
 	// I opted for TWeakObjectPtrs because I didn't want a shared hard reference here and I didn't want an extra function call of getting
 	// the ASC/AttributeSet from the PlayerState or child classes every time I referenced them in this base class.
 
-	TWeakObjectPtr<class UGDAbilitySystemComponent> AbilitySystemComponent;
-	TWeakObjectPtr<class UGDAttributeSetBase> AttributeSetBase;
+	UPROPERTY(Instanced, VisibleAnywhere, Category = "GASDocumentation|GDCharacter")
+	UGDAbilitySystemComponent* AbilitySystemComponent = nullptr;
+
+	UPROPERTY(Instanced, VisibleAnywhere, Category = "GASDocumentation|GDCharacter")
+	UGDAttributeSetBase* AttributeSetBase = nullptr;
 
 	FGameplayTag HitDirectionFrontTag;
 	FGameplayTag HitDirectionBackTag;

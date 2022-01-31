@@ -31,7 +31,7 @@ AGDCharacterBase::AGDCharacterBase(const class FObjectInitializer& ObjectInitial
 
 UAbilitySystemComponent * AGDCharacterBase::GetAbilitySystemComponent() const
 {
-	return AbilitySystemComponent.Get();
+	return AbilitySystemComponent;
 }
 
 bool AGDCharacterBase::IsAlive() const
@@ -46,7 +46,7 @@ int32 AGDCharacterBase::GetAbilityLevel(EGDAbilityInputID AbilityID) const
 
 void AGDCharacterBase::RemoveCharacterAbilities()
 {
-	if (GetLocalRole() != ROLE_Authority || !AbilitySystemComponent.IsValid() || !AbilitySystemComponent->CharacterAbilitiesGiven)
+	if (GetLocalRole() != ROLE_Authority || !(AbilitySystemComponent != nullptr && AbilitySystemComponent->IsValidLowLevel()) || !AbilitySystemComponent->CharacterAbilitiesGiven)
 	{
 		return;
 	}
@@ -139,7 +139,7 @@ bool AGDCharacterBase::PlayHitReact_Validate(FGameplayTag HitDirection, AActor *
 
 int32 AGDCharacterBase::GetCharacterLevel() const
 {
-	if (AttributeSetBase.IsValid())
+	if (AttributeSetBase->IsValidLowLevel())
 	{
 		return static_cast<int32>(AttributeSetBase->GetCharacterLevel());
 	}
@@ -149,7 +149,7 @@ int32 AGDCharacterBase::GetCharacterLevel() const
 
 float AGDCharacterBase::GetHealth() const
 {
-	if (AttributeSetBase.IsValid())
+	if (AttributeSetBase->IsValidLowLevel())
 	{
 		return AttributeSetBase->GetHealth();
 	}
@@ -159,7 +159,7 @@ float AGDCharacterBase::GetHealth() const
 
 float AGDCharacterBase::GetMaxHealth() const
 {
-	if (AttributeSetBase.IsValid())
+	if (AttributeSetBase->IsValidLowLevel())
 	{
 		return AttributeSetBase->GetMaxHealth();
 	}
@@ -169,7 +169,7 @@ float AGDCharacterBase::GetMaxHealth() const
 
 float AGDCharacterBase::GetMana() const
 {
-	if (AttributeSetBase.IsValid())
+	if (AttributeSetBase->IsValidLowLevel())
 	{
 		return AttributeSetBase->GetMana();
 	}
@@ -179,7 +179,7 @@ float AGDCharacterBase::GetMana() const
 
 float AGDCharacterBase::GetMaxMana() const
 {
-	if (AttributeSetBase.IsValid())
+	if (AttributeSetBase->IsValidLowLevel())
 	{
 		return AttributeSetBase->GetMaxMana();
 	}
@@ -189,7 +189,7 @@ float AGDCharacterBase::GetMaxMana() const
 
 float AGDCharacterBase::GetStamina() const
 {
-	if (AttributeSetBase.IsValid())
+	if (AttributeSetBase->IsValidLowLevel())
 	{
 		return AttributeSetBase->GetStamina();
 	}
@@ -199,7 +199,7 @@ float AGDCharacterBase::GetStamina() const
 
 float AGDCharacterBase::GetMaxStamina() const
 {
-	if (AttributeSetBase.IsValid())
+	if (AttributeSetBase->IsValidLowLevel())
 	{
 		return AttributeSetBase->GetMaxStamina();
 	}
@@ -209,7 +209,7 @@ float AGDCharacterBase::GetMaxStamina() const
 
 float AGDCharacterBase::GetMoveSpeed() const
 {
-	if (AttributeSetBase.IsValid())
+	if (AttributeSetBase->IsValidLowLevel())
 	{
 		return AttributeSetBase->GetMoveSpeed();
 	}
@@ -219,9 +219,9 @@ float AGDCharacterBase::GetMoveSpeed() const
 
 float AGDCharacterBase::GetMoveSpeedBaseValue() const
 {
-	if (AttributeSetBase.IsValid())
+	if (AttributeSetBase->IsValidLowLevel())
 	{
-		return AttributeSetBase->GetMoveSpeedAttribute().GetGameplayAttributeData(AttributeSetBase.Get())->GetBaseValue();
+		return AttributeSetBase->GetMoveSpeedAttribute().GetGameplayAttributeData(AttributeSetBase)->GetBaseValue();
 	}
 
 	return 0.0f;
@@ -239,7 +239,7 @@ void AGDCharacterBase::Die()
 
 	OnCharacterDied.Broadcast(this);
 
-	if (AbilitySystemComponent.IsValid())
+	if (AbilitySystemComponent->IsValidLowLevel())
 	{
 		AbilitySystemComponent->CancelAllAbilities();
 
@@ -274,7 +274,7 @@ void AGDCharacterBase::BeginPlay()
 void AGDCharacterBase::AddCharacterAbilities()
 {
 	// Grant abilities, but only on the server	
-	if (GetLocalRole() != ROLE_Authority || !AbilitySystemComponent.IsValid() || AbilitySystemComponent->CharacterAbilitiesGiven)
+	if (GetLocalRole() != ROLE_Authority || !AbilitySystemComponent->IsValidLowLevel() || AbilitySystemComponent->CharacterAbilitiesGiven)
 	{
 		return;
 	}
@@ -290,7 +290,7 @@ void AGDCharacterBase::AddCharacterAbilities()
 
 void AGDCharacterBase::InitializeAttributes()
 {
-	if (!AbilitySystemComponent.IsValid())
+	if (!AbilitySystemComponent->IsValidLowLevel())
 	{
 		return;
 	}
@@ -308,13 +308,13 @@ void AGDCharacterBase::InitializeAttributes()
 	FGameplayEffectSpecHandle NewHandle = AbilitySystemComponent->MakeOutgoingSpec(DefaultAttributes, GetCharacterLevel(), EffectContext);
 	if (NewHandle.IsValid())
 	{
-		FActiveGameplayEffectHandle ActiveGEHandle = AbilitySystemComponent->ApplyGameplayEffectSpecToTarget(*NewHandle.Data.Get(), AbilitySystemComponent.Get());
+		FActiveGameplayEffectHandle ActiveGEHandle = AbilitySystemComponent->ApplyGameplayEffectSpecToTarget(*NewHandle.Data.Get(), AbilitySystemComponent);
 	}
 }
 
 void AGDCharacterBase::AddStartupEffects()
 {
-	if (GetLocalRole() != ROLE_Authority || !AbilitySystemComponent.IsValid() || AbilitySystemComponent->StartupEffectsApplied)
+	if (GetLocalRole() != ROLE_Authority || !AbilitySystemComponent->IsValidLowLevel() || AbilitySystemComponent->StartupEffectsApplied)
 	{
 		return;
 	}
@@ -327,7 +327,7 @@ void AGDCharacterBase::AddStartupEffects()
 		FGameplayEffectSpecHandle NewHandle = AbilitySystemComponent->MakeOutgoingSpec(GameplayEffect, GetCharacterLevel(), EffectContext);
 		if (NewHandle.IsValid())
 		{
-			FActiveGameplayEffectHandle ActiveGEHandle = AbilitySystemComponent->ApplyGameplayEffectSpecToTarget(*NewHandle.Data.Get(), AbilitySystemComponent.Get());
+			FActiveGameplayEffectHandle ActiveGEHandle = AbilitySystemComponent->ApplyGameplayEffectSpecToTarget(*NewHandle.Data.Get(), AbilitySystemComponent);
 		}
 	}
 
@@ -336,7 +336,7 @@ void AGDCharacterBase::AddStartupEffects()
 
 void AGDCharacterBase::SetHealth(float Health)
 {
-	if (AttributeSetBase.IsValid())
+	if (AttributeSetBase->IsValidLowLevel())
 	{
 		AttributeSetBase->SetHealth(Health);
 	}
@@ -344,7 +344,7 @@ void AGDCharacterBase::SetHealth(float Health)
 
 void AGDCharacterBase::SetMana(float Mana)
 {
-	if (AttributeSetBase.IsValid())
+	if (AttributeSetBase->IsValidLowLevel())
 	{
 		AttributeSetBase->SetMana(Mana);
 	}
@@ -352,7 +352,7 @@ void AGDCharacterBase::SetMana(float Mana)
 
 void AGDCharacterBase::SetStamina(float Stamina)
 {
-	if (AttributeSetBase.IsValid())
+	if (AttributeSetBase->IsValidLowLevel())
 	{
 		AttributeSetBase->SetStamina(Stamina);
 	}

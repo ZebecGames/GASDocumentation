@@ -240,7 +240,7 @@ void AGDHeroCharacter::MoveRight(float Value)
 void AGDHeroCharacter::InitializeFloatingStatusBar()
 {
 	// Only create once
-	if (UIFloatingStatusBar || !AbilitySystemComponent.IsValid())
+	if (UIFloatingStatusBar || !(AbilitySystemComponent != nullptr && AbilitySystemComponent->IsValidLowLevel()))
 	{
 		return;
 	}
@@ -312,7 +312,7 @@ void AGDHeroCharacter::OnRep_PlayerState()
 
 void AGDHeroCharacter::BindASCInput()
 {
-	if (!ASCInputBound && AbilitySystemComponent.IsValid() && IsValid(InputComponent))
+	if (!ASCInputBound && AbilitySystemComponent != nullptr && AbilitySystemComponent->IsValidLowLevel() && IsValid(InputComponent))
 	{
 		AbilitySystemComponent->BindAbilityActivationToInputComponent(InputComponent, FGameplayAbilityInputBinds(FString("ConfirmTarget"),
 			FString("CancelTarget"), FString("EGDAbilityInputID"), static_cast<int32>(EGDAbilityInputID::Confirm), static_cast<int32>(EGDAbilityInputID::Cancel)));
